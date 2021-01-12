@@ -32,7 +32,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
     console.log();
     process.exit(1);
   }
-  const { skipDemo } = commandArgs;
+  const { skipDemo, watchDemo } = commandArgs;
   const watchDist = commandArgs.watchDist || userConfig.watchDist;
   // compatible with rax-seed
   modifyUserConfig('watchDist', !!watchDist);
@@ -69,7 +69,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
 
   let raxBundles = false;
 
-  if (!watchDist && !skipDemo) {
+  if ((!watchDist && !skipDemo) || watchDemo) {
     raxBundles = getRaxBundles();
     // watch demo changes
     if (command === 'start') {
