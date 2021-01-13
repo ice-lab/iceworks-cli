@@ -32,7 +32,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
     console.log();
     process.exit(1);
   }
-  const { skipDemo, watchDemo } = commandArgs;
+  const { skipDemo } = commandArgs;
   const watchDist = commandArgs.watchDist || userConfig.watchDist;
   // compatible with rax-seed
   modifyUserConfig('watchDist', !!watchDist);
@@ -69,7 +69,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
 
   let raxBundles = false;
 
-  if ((!watchDist && !skipDemo) || watchDemo) {
+  if (!skipDemo) {
     raxBundles = getRaxBundles();
     // watch demo changes
     if (command === 'start') {
@@ -94,7 +94,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
   }
   // task name rule `component-build-${target}`.
   // plugins depend on task names, change task name rule will cause break change.
-  if (command === 'start' && !watchDist) {
+  if (command === 'start' && !skipDemo) {
     targets.forEach((target) => {
       const options = { ...compileOptions, target, inlineStyle };
       if ([WEB, WEEX, NODE].includes(target)) {
@@ -102,15 +102,19 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
         const configDev = require(`./configs/rax/${target}/dev`);
         const defaultConfig = getBaseWebpack(context, options);
         configDev(defaultConfig, context, { ...options, entries, serverBundles });
-        registerTask(`component-build-${target}`, defaultConfig);
-      } else if ([MINIAPP, WECHAT_MINIPROGRAM].includes(target)) {
+        registerTask(`component-start-${target}`, defaultConfig);
+      }
+
+      if ([MINIAPP, WECHAT_MINIPROGRAM].includes(target) && !watchDist) {
         options[target] = options[target] || {};
         addMiniappTargetParam(target, options[target]);
         const config = getMiniappConfig(context, target, options, onGetWebpackConfig);
-        registerTask(`component-build-${target}`, config);
+        registerTask(`component-start-${target}`, config);
       }
     });
-  } else if (command === 'build' || watchDist) {
+  }
+
+  if (command === 'build' || watchDist) {
     // omitLib just for sfc2mp，not for developer
     const disableGenerateLib = userConfig[MINIAPP] && userConfig[MINIAPP].omitLib;
 
@@ -153,7 +157,7 @@ module.exports = ({ registerTask, registerUserConfig, context, onHook, registerC
   }
 
   onHook(`before.${command}.run`, async () => {
-    if (!skipDemo && !watchDist && raxBundles) {
+    if (!skipDemo && raxBundles) {
       await generateRaxDemo(demos, context);
     }
   });
