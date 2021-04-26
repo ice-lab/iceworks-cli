@@ -1,10 +1,31 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+
 const { configHTMLPlugin } = require('../../utils/htmlInjection');
 
-module.exports = (config, { pkg, rootDir, entry }) => {
+module.exports = (config, { pkg, rootDir, entry, webpack }) => {
   config.target('web');
   config.context(rootDir);
+
+  const isWebpack5 = webpack && Number(webpack.version.split('.')[0]) > 4;
+
+  if (isWebpack5) {
+    const { ModuleFederationPlugin } = webpack && webpack.container;
+
+    config.plugin('mf').use(ModuleFederationPlugin, [
+      {
+        name: 'mfff',
+        shared: {
+          react: {
+            singleton: true,
+          },
+          'react-dom': {
+            singleton: true,
+          },
+        },
+      },
+    ]);
+  }
 
   // modify entry
   config.entryPoints.clear();

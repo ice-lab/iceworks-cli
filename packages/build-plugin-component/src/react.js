@@ -24,7 +24,7 @@ const babelCompiler = require('./compiler/babel');
 module.exports = (
   { context, registerTask, registerCliOption, registerUserConfig, onGetWebpackConfig, onHook, log, onGetJestConfig },
 ) => {
-  const { command, rootDir, pkg, commandArgs, userConfig } = context;
+  const { command, rootDir, pkg, commandArgs, userConfig, webpack } = context;
   const { plugins, ...compileOptions } = userConfig;
   const { library, demoTemplate = 'template-component-demo', basicComponents = [] } = compileOptions;
 
@@ -49,6 +49,7 @@ module.exports = (
     const params = {
       rootDir,
       pkg,
+      webpack,
     };
 
     const generateDemoEntry = () => {
@@ -86,9 +87,11 @@ module.exports = (
           demoData,
         },
       });
+      fs.ensureDirSync(outputDir);
+      fs.copySync(path.join(__dirname, './template/bootstrap.js'), path.join(outputDir, 'index.js'));
       // wirte demo content
       fs.writeFileSync(demoDataPath, `const data = ${JSON.stringify(demoData)};export default data;`);
-      params.entry = { index: entryPath };
+      params.entry = { index: path.join(outputDir, 'index.js') };
     };
 
     generateDemoEntry();
