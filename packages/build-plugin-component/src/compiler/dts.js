@@ -34,7 +34,7 @@ module.exports = function dtsCompiler(compileInfo, log = console) {
   // Create a Program with an in-memory emit
   let createdFiles = {};
   const host = ts.createCompilerHost(options);
-  host.writeFile = (fileName, contents) => { createdFiles[fileName] = contents; };
+  host.writeFile = (fileName, contents) => { createdFiles[path.resolve(fileName)] = contents; };
 
   // Prepare and emit the d.ts files
   const program = ts.createProgram(needCompileList.map(({ sourceFile }) => sourceFile), options, host);
