@@ -19,6 +19,10 @@
       "pre-push": "npm run lint"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ice-lab/iceworks-cli.git"
+  },
   "devDependencies": {
     "@commitlint/cli": "^11.0.0",
     "@iceworks/spec": "^1.0.1",
